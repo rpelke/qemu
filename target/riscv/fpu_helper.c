@@ -282,6 +282,14 @@ uint64_t helper_fsqrt_s(CPURISCVState *env, uint64_t rs1)
     return nanbox_s(env, float32_sqrt(frs1, &env->fp_status));
 }
 
+uint64_t helper_custom_exp_s(CPURISCVState *env, uint64_t rs1)
+{
+    float32 frs1 = check_nanbox_s(env, rs1);
+    float32 log2e = make_float32(0x3fb8aa3b);
+    float32 scaled = float32_mul(frs1, log2e, &env->fp_status);
+    return nanbox_s(env, float32_exp2(scaled, &env->fp_status));
+}
+
 target_ulong helper_fle_s(CPURISCVState *env, uint64_t rs1, uint64_t rs2)
 {
     float32 frs1 = check_nanbox_s(env, rs1);

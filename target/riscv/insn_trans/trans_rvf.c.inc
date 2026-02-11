@@ -241,6 +241,28 @@ static bool trans_fsqrt_s(DisasContext *ctx, arg_fsqrt_s *a)
     return true;
 }
 
+static bool trans_custom_exp(DisasContext *ctx, arg_custom_exp *a)
+{
+    static bool custom_exp_logged;
+
+    REQUIRE_FPU;
+    REQUIRE_ZFINX_OR_F(ctx);
+
+    if (!custom_exp_logged) {
+        custom_exp_logged = true;
+        fprintf(stderr, "riscv: custom_exp detected (first time)\n");
+    }
+
+    TCGv_i64 dest = dest_fpr(ctx, a->rd);
+    TCGv_i64 src1 = get_fpr_hs(ctx, a->rs1);
+
+    gen_set_rm(ctx, RISCV_FRM_DYN);
+    gen_helper_custom_exp_s(dest, tcg_env, src1);
+    gen_set_fpr_hs(ctx, a->rd, dest);
+    mark_fs_dirty(ctx);
+    return true;
+}
+
 static bool trans_fsgnj_s(DisasContext *ctx, arg_fsgnj_s *a)
 {
     REQUIRE_FPU;
